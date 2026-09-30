@@ -1,0 +1,329 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans:
+    var(--font-readex-pro), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-rubik), var(--font-readex-pro), sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
+
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+
+  --color-signal-50: #fffbeb;
+  --color-signal-100: #fef3c7;
+  --color-signal-200: #fde68a;
+  --color-signal-300: #fcd34d;
+  --color-signal-400: #fbbf24;
+  --color-signal-500: #eab308;
+  --color-signal-600: #ca8a04;
+  --color-signal-700: #a16207;
+
+  --color-ink-0: #ffffff;
+  --color-ink-25: #f7f8fa;
+  --color-ink-50: #eef0f3;
+  --color-ink-100: #dde1e7;
+  --color-ink-200: #c3c9d3;
+  --color-ink-300: #9aa3b2;
+  --color-ink-400: #6b7385;
+  --color-ink-500: #4b5263;
+  --color-ink-600: #363c4b;
+  --color-ink-700: #262b37;
+  --color-ink-800: #171a22;
+  --color-ink-900: #0f1115;
+  --color-ink-950: #0b0d12;
+}
+
+@custom-variant dark (&:where(html.dark, html.dark *));
+
+:root {
+  --background: var(--color-ink-0);
+  --foreground: var(--color-ink-900);
+  --card: var(--color-ink-0);
+  --card-border: var(--color-ink-100);
+  --muted: var(--color-ink-500);
+  --accent: var(--color-primary-600);
+  --accent-foreground: var(--color-ink-0);
+  --accent-hover: var(--color-primary-700);
+  --border: var(--color-ink-100);
+  --focus-ring: rgb(37 99 235 / 0.25);
+  /* A real green, not the accent blue. Success used to be --color-primary-600,
+     which made a "تم الحفظ" confirmation look exactly like a link. emerald-700
+     is 5.48:1 on --background. */
+  --success: #047857;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+}
+
+.dark {
+  --background: var(--color-ink-950);
+  --foreground: var(--color-ink-100);
+  --card: var(--color-ink-900);
+  --card-border: var(--color-ink-800);
+  --muted: var(--color-ink-400);
+  --accent: var(--color-primary-500);
+  --accent-foreground: var(--color-ink-950);
+  --accent-hover: var(--color-primary-400);
+  --border: var(--color-ink-800);
+  --focus-ring: rgb(96 165 250 / 0.3);
+  /* emerald-400 = 9.83:1 on the dark background. The light value (#047857) is
+     only 3.9:1 here, so this must differ per theme. */
+  --success: #34d399;
+  --danger: #f87171;
+  --danger-bg: rgb(127 29 29 / 0.25);
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  min-height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+code,
+pre,
+kbd,
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+* {
+  border-color: var(--border);
+}
+
+::selection {
+  background: var(--color-primary-200);
+  color: var(--color-primary-900);
+}
+.dark ::selection {
+  background: rgb(59 130 246 / 0.35);
+  color: var(--color-ink-50);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-300) transparent;
+}
+.dark * {
+  scrollbar-color: var(--color-ink-600) transparent;
+}
+
+button,
+input,
+textarea,
+select,
+a {
+  outline: none;
+}
+/* `a` is in both lists on purpose. Links used to fall through to the browser's
+   default focus ring, so the app showed two different focus indicators — the
+   token one and Chrome's. Dropping the outline is only correct because the
+   matching :focus-visible rule below replaces it. */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+a:focus-visible {
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  /* border-color: var(--accent); */
+}
+
+[dir="rtl"] {
+  direction: rtl;
+}
+
+.spoiler {
+  background: var(--color-ink-100);
+  border-radius: 0.25rem;
+  padding: 0 0.2em;
+  color: transparent;
+  cursor: default;
+}
+.dark .spoiler {
+  background: var(--color-ink-700);
+}
+.spoiler:hover,
+.spoiler:focus {
+  color: inherit;
+  background: var(--color-ink-200);
+}
+.dark .spoiler:hover,
+.dark .spoiler:focus {
+  background: var(--color-ink-700);
+}
+
+/* ===== Message editor: Telegram-like rich preview =====
+   Applied to the contenteditable (.msg-editor) so the admin sees the message
+   shaped like it will appear in Telegram: bordered tables, visible list
+   markers, headings, quotes, footers, dividers, etc. */
+.msg-editor p {
+  margin: 0 0 0.25em;
+}
+.msg-editor p:last-child {
+  margin-bottom: 0;
+}
+.msg-editor h1,
+.msg-editor h2,
+.msg-editor h3,
+.msg-editor h4,
+.msg-editor h5,
+.msg-editor h6 {
+  font-family: var(--font-display);
+  line-height: 1.3;
+  margin: 0.5em 0 0.25em;
+}
+.msg-editor blockquote {
+  margin: 0.4em 0;
+  border-inline-start: 3px solid var(--color-ink-300);
+  padding-inline-start: 0.6em;
+  color: var(--muted);
+}
+.msg-editor aside {
+  margin: 0.4em 0;
+  border-inline-start: 3px solid var(--color-primary-400);
+  padding-inline-start: 0.6em;
+  color: var(--muted);
+  font-style: italic;
+}
+.msg-editor ul {
+  margin: 0.3em 0;
+  padding-inline-start: 1.4em;
+  list-style: disc;
+}
+.msg-editor ol {
+  margin: 0.3em 0;
+  padding-inline-start: 1.4em;
+  list-style: decimal;
+}
+.msg-editor li {
+  margin: 0.1em 0;
+}
+.msg-editor ul ul {
+  list-style: circle;
+}
+.msg-editor ol ul {
+  list-style: circle;
+}
+.msg-editor table {
+  border-collapse: collapse;
+  margin: 0.4em 0;
+  min-width: 50%;
+}
+.msg-editor caption {
+  caption-side: top;
+  text-align: center;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 0.2em 0 0.4em;
+}
+.msg-editor th,
+.msg-editor td {
+  border: 1px solid var(--color-ink-300);
+  padding: 0.3em 0.5em;
+  vertical-align: top;
+  text-align: start;
+}
+.msg-editor th {
+  background: var(--color-ink-50);
+  font-weight: 600;
+}
+.dark .msg-editor th {
+  background: var(--color-ink-800);
+}
+.msg-editor details {
+  margin: 0.4em 0;
+}
+.msg-editor summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.msg-editor footer {
+  margin-top: 0.5em;
+  font-size: 0.85em;
+  color: var(--muted);
+}
+.msg-editor hr {
+  margin: 0.7em 0;
+  border: 0;
+  border-top: 2px solid var(--color-ink-200);
+}
+.dark .msg-editor hr {
+  border-top: 2px solid var(--color-ink-600);
+}
+.msg-editor pre {
+  margin: 0.4em 0;
+  padding: 0.6em;
+  background: var(--color-ink-25);
+  border: 1px solid var(--color-ink-100);
+  border-radius: 0.4rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  direction: ltr;
+}
+.msg-editor code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--color-ink-25);
+  border: 1px solid var(--color-ink-100);
+  border-radius: 0.25rem;
+  padding: 0.1em 0.3em;
+}
+.dark .msg-editor code{
+  background: var(--color-ink-600);
+  border: 1px solid var(--color-ink-700);
+}
+.msg-editor pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.msg-editor mark {
+  background: rgb(250 204 21 / 0.35);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 0.1em;
+}
+.msg-editor a {
+  color: var(--color-primary-600);
+  text-decoration: underline;
+}
+.dark .msg-editor a {
+  color: var(--color-primary-400);
+}
+
+/* Formatting marks (Office-Word style) so the admin can tell a paragraph
+   break from a soft line break — enabled with .show-marks on the editor. */
+.msg-editor.show-marks p::after {
+  content: " ¶";
+  color: var(--color-ink-300);
+}
+.msg-editor.show-marks br::after {
+  content: " ↵";
+  color: var(--color-ink-300);
+}
