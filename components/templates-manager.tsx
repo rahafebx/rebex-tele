@@ -26,6 +26,7 @@ import {
 import { Spinner } from "@/components/spinner";
 import Input from "./ui/input";
 import { EmptyState } from "./ui/empty-state";
+import { Button } from "./ui/button";
 
 type Message = { text: string; error: boolean };
 
@@ -237,23 +238,24 @@ export function TemplatesManager() {
           </div>
           <div className="flex items-center gap-3">
             {editing && (
-              <button
+              <Button
+                size="md"
                 onClick={resetForm}
                 disabled={busy === "save"}
-                className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-[15px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)] disabled:opacity-50"
               >
                 <X size={17} /> إلغاء
-              </button>
+              </Button>
             )}
-            <button
+            <Button
+              variant="primary"
+              size="md"
               onClick={save}
               disabled={busy === "save" || !title.trim()}
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
             >
               {busy === "save" && <Spinner />}
               {editing ? <Save size={17} /> : <Plus size={17} />}
               {editing ? "حفظ التعديلات" : "إضافة القالب"}
-            </button>
+            </Button>
           </div>
         </div>
       </section>
@@ -321,17 +323,20 @@ export function TemplatesManager() {
                     </p>
                   </div>
                   <div className="flex shrink-0 flex-wrap items-center gap-2">
-                    <button
+                    <Button
+                      size="sm"
+                      className="text-[15px]"
                       onClick={() => startEdit(t)}
                       disabled={busy === `delete:${t.id}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[15px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] disabled:opacity-50"
                     >
                       <Pencil size={15} /> تحرير
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      size="sm"
+                      dangerOutline
+                      className="text-[15px]"
                       onClick={() => remove(t)}
                       disabled={busy === `delete:${t.id}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[15px] text-[var(--danger)] transition-colors disabled:opacity-50"
                     >
                       {busy === `delete:${t.id}` ? (
                         <Spinner />
@@ -339,7 +344,7 @@ export function TemplatesManager() {
                         <Trash2 size={15} />
                       )}
                       حذف
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}

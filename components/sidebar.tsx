@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import { BrandMark } from "@/components/brand-mark";
+import { Button } from "@/components/ui/button";
 import { signOut } from "@/app/dashboard/actions";
 
 const links = [
@@ -45,13 +46,14 @@ export function Sidebar({
           <BrandMark size={32} />
           <span className="font-display text-lg">ريبيكس تيلي</span>
         </div>
-        <button
+        <Button
+          variant="ghost"
+          className="p-2"
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="rounded-lg p-2 text-[var(--muted)] hover:bg-[var(--color-ink-50)] dark:hover:bg-[var(--color-ink-800)]"
           aria-label="تبديل السمة"
         >
           {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+        </Button>
       </div>
       <nav className="fixed bottom-0 left-0 right-0 z-10 bg-[var(--card)] p-5 lg:p-0 border-t lg:border-0 lg:static mt-6 flex justify-between lg:block">
         {links.map(([href, label, Icon]) => (
@@ -75,12 +77,13 @@ export function Sidebar({
             <span>{lastLogin}</span>
           </p>
         )}
-        <button
+        <Button
+          variant="ghost"
+          className="mt-3 px-0 text-[15px]"
           onClick={signOut}
-          className="mt-3 flex items-center gap-2 text-[15px] text-[var(--muted)] hover:text-[var(--foreground)]"
         >
           <LogOut size={17} /> تسجيل الخروج
-        </button>
+        </Button>
       </div>
     </aside>
   );

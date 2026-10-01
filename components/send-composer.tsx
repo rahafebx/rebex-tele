@@ -17,6 +17,7 @@ import {
 import { Spinner } from "@/components/spinner";
 import Input from "./ui/input";
 import { Dropdown } from "./ui/dropdown";
+import { Button } from "./ui/button";
 
 const topicLabel = (t: TelegramTopic) =>
   t.name ?? `الموضوع ${t.telegram_thread_id}`;
@@ -154,15 +155,14 @@ export function SendComposer({
           placeholder="تحميل قالب..."
         />
         </div>
-        <button
-          type="button"
-          onClick={saveAsTemplate}
-          disabled={savingTemplate || sending}
-          className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-[15px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] disabled:opacity-50"
-        >
-          {savingTemplate ? <Spinner /> : <Save size={16} />}
-          حفظ كقالب
-        </button>
+        <Button
+            onClick={saveAsTemplate}
+            disabled={savingTemplate || sending}
+            className="px-3 py-2 text-[15px]"
+          >
+            {savingTemplate ? <Spinner /> : <Save size={16} />}
+            حفظ كقالب
+          </Button>
         <Link
           href="/dashboard/templates"
           className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-[15px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
@@ -194,14 +194,15 @@ export function SendComposer({
               {status.text}
             </span>
           )}
-          <button
+          <Button
+            variant="primary"
+            size="md"
             onClick={submit}
             disabled={!chatId || sending || savingTemplate}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
           >
             {sending && <Spinner />}
             <Send size={17} /> إرسال
-          </button>
+          </Button>
         </div>
       </div>
     </div>

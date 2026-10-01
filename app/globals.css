@@ -60,6 +60,13 @@
   --success: #047857;
   --danger: #dc2626;
   --danger-bg: #fef2f2;
+  /* A filled danger button is --danger as a BACKGROUND with white text, which is
+     the opposite pairing from the one above and needs its own value. Reusing
+     --danger there gave 4.83:1 here but only 2.77:1 in dark mode, where --danger
+     is the light #f87171. These two clear AA against white in both themes
+     (4.83:1 and 6.47:1). */
+  --danger-solid: #dc2626;
+  --danger-solid-hover: #b91c1c;
 }
 
 .dark {
@@ -78,6 +85,8 @@
   --success: #34d399;
   --danger: #f87171;
   --danger-bg: rgb(127 29 29 / 0.25);
+  --danger-solid: #b91c1c;
+  --danger-solid-hover: #991b1b;
 }
 
 html {

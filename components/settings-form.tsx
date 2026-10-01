@@ -8,6 +8,7 @@ import {
 } from "@/app/dashboard/settings/actions";
 import { Spinner } from "@/components/spinner";
 import Input from "./ui/input";
+import { Button } from "./ui/button";
 
 type Message = { text: string; error: boolean };
 
@@ -102,14 +103,16 @@ export function SettingsForm({
           hint="يُستخدم الرمز فقط في طلبات تيليجرام من جهة الخادم. لا تضعه أبدًا في المتغيّرات."
         />
 
-        <button
+        <Button
           type="submit"
+          variant="primary"
+          size="md"
+          className="mt-4"
           disabled={busy || !token}
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
         >
           {busy && <Spinner />}
           تحقق واحفظ
-        </button>
+        </Button>
         {msg && (
           <p
             className={`mt-3 text-[15px] ${msg.error ? "text-[var(--danger)]" : "text-[var(--success)]"}`}
@@ -149,24 +152,25 @@ export function SettingsForm({
         />
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="md"
             disabled={watchBusy || !watchToken}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
           >
             {watchBusy && <Spinner />}
             تحقق واحفظ
-          </button>
+          </Button>
           {watchUsername && (
-            <button
-              type="button"
+            <Button
+              size="md"
+              dangerOutline
               onClick={disconnectWatch}
               disabled={disconnecting}
-              className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2.5 text-[15px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--danger)] disabled:opacity-50"
             >
               {disconnecting && <Spinner />}
               فصل بوت المراقبة
-            </button>
+            </Button>
           )}
         </div>
         {watchMsg && (

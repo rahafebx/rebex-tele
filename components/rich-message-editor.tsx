@@ -27,6 +27,7 @@ import {
   exitListOnEnter,
 } from "@/lib/telegram/insert";
 import { EditViewToggle, type EditView } from "@/components/edit-view-toggle";
+import { Button } from "@/components/ui/button";
 
 function Tool({
   title,
@@ -40,16 +41,21 @@ function Tool({
   active?: boolean;
 }) {
   return (
-    <button
-      type="button"
+    // `active` here is a subtle tint, not the inverted treatment Button's own
+    // `active` prop applies (that suits a segmented view switcher, not a dense
+    // toolbar where an inverted button reads as a different kind of control).
+    // The hover colours are already in the ghost variant.
+    <Button
+      variant="ghost"
       title={title}
+      size="sm"
       aria-pressed={active ?? undefined}
       onMouseDown={(e) => e.preventDefault()}
       onClick={onClick}
-      className={`rounded-md p-2 ${active ? "bg-[var(--color-ink-100)] text-[var(--foreground)] dark:bg-[var(--color-ink-800)]" : "text-[var(--muted)] hover:bg-[var(--color-ink-50)] hover:text-[var(--foreground)] dark:hover:bg-[var(--color-ink-800)]"}`}
+      className={`rounded-md p-2 ${active ? "bg-[var(--color-ink-100)] text-[var(--foreground)] dark:bg-[var(--color-ink-800)]" : ""}`}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -188,7 +194,7 @@ export function RichMessageEditor({
   return (
     <>
       <div className="border-b p-2">
-        <div className="flex flex-wrap items-center gap-0.5">
+        <div className="flex flex-wrap items-center gap-2">
           <EditViewToggle view={view} onChange={switchView} />
           {view === "preview" && (
             <>

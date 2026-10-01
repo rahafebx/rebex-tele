@@ -10,6 +10,7 @@ import {
 } from "@/app/dashboard/security/actions";
 import { Spinner } from "@/components/spinner";
 import Input from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 type Message = { text: string; error: boolean };
 
@@ -223,13 +224,14 @@ export function SecurityManager({
                     </div>
                   </div>
                   {confirmDeleteId !== factor.id && (
-                    <button
-                      type="button"
+                    <Button
+                      size="sm"
+                      dangerOutline
+                      className="shrink-0"
                       onClick={() => setConfirmDeleteId(factor.id)}
-                      className="shrink-0 rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--muted)] transition-colors hover:text-[var(--danger)]"
                     >
                       حذف
-                    </button>
+                    </Button>
                   )}
                 </div>
                 {confirmDeleteId === factor.id && (
@@ -240,23 +242,22 @@ export function SecurityManager({
                         : "سيُحذف هذا العامل غير المكتمل. متابعة؟"}
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      <button
-                        type="button"
+                      <Button
+                        variant="danger"
+                        size="sm"
                         onClick={() => removeFactor(factor.id)}
                         disabled={deletingId === factor.id}
-                        className="inline-flex items-center gap-2 rounded-lg bg-[var(--danger)] px-3 py-1.5 text-sm font-medium text-white transition-opacity disabled:opacity-50"
                       >
                         {deletingId === factor.id && <Spinner size={14} />}
                         تأكيد الحذف
-                      </button>
-                      <button
-                        type="button"
+                      </Button>
+                      <Button
+                        size="sm"
                         onClick={() => setConfirmDeleteId(null)}
                         disabled={deletingId === factor.id}
-                        className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm text-[var(--muted)] disabled:opacity-50"
                       >
                         تراجع
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -287,25 +288,25 @@ export function SecurityManager({
         )}
 
         {!mfaEnrolled && !enrollment && (
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="md"
             onClick={start}
             disabled={enrolling}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
           >
             {enrolling && <Spinner />}
             تفعيل المصادقة الثنائية
-          </button>
+          </Button>
         )}
 
         {mfaEnrolled && !confirmUnenroll && (
-          <button
-            type="button"
+          <Button
+            size="md"
+            dangerOutline
             onClick={() => setConfirmUnenroll(true)}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] px-4 py-2.5 text-[15px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--danger)]"
           >
             إيقاف المصادقة الثنائية
-          </button>
+          </Button>
         )}
 
         {mfaEnrolled && confirmUnenroll && (
@@ -314,23 +315,22 @@ export function SecurityManager({
               سيصبح الدخول بكلمة المرور وحدها. متابعة؟
             </p>
             <div className="mt-3 flex flex-wrap gap-3">
-              <button
-                type="button"
+              <Button
+                variant="danger"
+                size="md"
                 onClick={unenroll}
                 disabled={unenrolling}
-                className="inline-flex items-center gap-2 rounded-lg bg-[var(--danger)] px-4 py-2.5 text-[15px] font-medium text-white transition-opacity disabled:opacity-50"
               >
                 {unenrolling && <Spinner />}
                 تأكيد الإيقاف
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                size="md"
                 onClick={() => setConfirmUnenroll(false)}
                 disabled={unenrolling}
-                className="rounded-lg border border-[var(--border)] px-4 py-2.5 text-[15px] font-medium text-[var(--muted)] disabled:opacity-50"
               >
                 تراجع
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -366,13 +366,12 @@ export function SecurityManager({
                   >
                     {enrollment.secret}
                   </code>
-                  <button
-                    type="button"
+                  <Button
+                    className="shrink-0"
                     onClick={() => copy(enrollment.secret, "secret")}
-                    className="shrink-0 rounded-lg border border-[var(--border)] px-3 py-2 text-[15px] text-[var(--muted)] hover:text-[var(--foreground)]"
                   >
                     {copied === "secret" ? "تم النسخ" : "نسخ"}
-                  </button>
+                  </Button>
                 </div>
                 <details className="mt-2">
                   <summary className="cursor-pointer text-sm text-[var(--muted)]">
@@ -385,13 +384,12 @@ export function SecurityManager({
                     >
                       {enrollment.uri}
                     </code>
-                    <button
-                      type="button"
+                    <Button
+                      className="shrink-0"
                       onClick={() => copy(enrollment.uri, "uri")}
-                      className="shrink-0 rounded-lg border border-[var(--border)] px-3 py-2 text-[15px] text-[var(--muted)] hover:text-[var(--foreground)]"
                     >
                       {copied === "uri" ? "تم النسخ" : "نسخ"}
-                    </button>
+                    </Button>
                   </div>
                 </details>
               </li>
@@ -413,26 +411,26 @@ export function SecurityManager({
                     className="tracking-[0.4em]"
                   />
                   <div className="mt-3 flex flex-wrap gap-3">
-                    <button
+                    <Button
                       type="submit"
+                      variant="primary"
+                      size="md"
                       disabled={verifying || code.length !== 6}
-                      className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
                     >
                       {verifying && <Spinner />}
                       تأكيد وتفعيل
-                    </button>
-                    <button
-                      type="button"
+                    </Button>
+                    <Button
+                      size="md"
                       onClick={() => {
                         setEnrollment(null);
                         setCode("");
                         setMfaMsg(null);
                       }}
                       disabled={verifying}
-                      className="rounded-lg border border-[var(--border)] px-4 py-2.5 text-[15px] font-medium text-[var(--muted)] disabled:opacity-50"
                     >
                       إلغاء
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </li>
@@ -476,16 +474,17 @@ export function SecurityManager({
             autoComplete="new-password"
             required
           />
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="md"
             disabled={
               changing || !currentPassword || !newPassword || !confirmPassword
             }
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
           >
             {changing && <Spinner />}
             تغيير كلمة المرور
-          </button>
+          </Button>
           {passwordMsg && (
             <p
               className={`text-[15px] ${passwordMsg.error ? "text-[var(--danger)]" : "text-[var(--success)]"}`}

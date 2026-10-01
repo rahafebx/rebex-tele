@@ -3,18 +3,15 @@ import { useSearchParams } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { login, submitMfa } from "@/app/login/actions";
 import { Spinner } from "@/components/spinner";
+import { Button } from "@/components/ui/button";
 
 function SubmitButton({ pendingLabel, label }: { pendingLabel: string; label: string }) {
   const { pending } = useFormStatus();
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
-    >
+    <Button type="submit" variant="primary" size="md" fullWidth disabled={pending}>
       {pending && <Spinner />}
       {pending ? pendingLabel : label}
-    </button>
+    </Button>
   );
 }
 

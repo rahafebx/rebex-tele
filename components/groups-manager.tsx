@@ -14,6 +14,7 @@ import PageHeading from "./ui/page-heading";
 import { Card } from "./ui/card";
 import Input from "./ui/input";
 import { EmptyState } from "./ui/empty-state";
+import { Button } from "./ui/button";
 
 const topicLabel = (t: TelegramTopic) =>
   t.name ?? `الموضوع ${t.telegram_thread_id}`;
@@ -100,14 +101,16 @@ export function GroupsManager() {
           dir="ltr"
           hint="أضف البوت إلى المجموعة أولاً وامنحه صلاحية إرسال الرسائل."
         />
-        <button
+        <Button
           type="submit"
+          variant="primary"
+          size="md"
+          className="mt-4"
           disabled={busyAdd || !chatId.trim()}
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
         >
           {busyAdd && <Spinner />}
           إضافة مجموعة
-        </button>
+        </Button>
         {msg && (
           <p
             className={`mt-3 text-[15px] ${msg.error ? "text-[var(--danger)]" : "text-[var(--success)]"}`}
@@ -128,7 +131,9 @@ export function GroupsManager() {
               </div>
               <div className="flex items-center justify-end gap-2">
                 {g.is_forum && (
-                  <button
+                  <Button
+                    accentOutline
+                    size="sm"
                     onClick={() => {
                       if (openChat === g.telegram_chat_id) {
                         setOpenChat(null);
@@ -138,12 +143,13 @@ export function GroupsManager() {
                       if (!topicsByChat[g.telegram_chat_id])
                         loadTopics(g.telegram_chat_id);
                     }}
-                    className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-medium text-[var(--color-primary-700)] hover:bg-[var(--color-primary-50)] dark:text-[var(--color-primary-300)] dark:hover:bg-[var(--color-primary-900)]"
                   >
                     <MessageSquarePlus size={15} /> إدارة المواضيع
-                  </button>
+                  </Button>
                 )}
-                <button
+                <Button
+                  dangerGhost
+                  className="p-2"
                   onClick={async () => {
                     setBusyRemoveGroup(g.id);
                     const r = await removeGroup(g.id);
@@ -156,7 +162,6 @@ export function GroupsManager() {
                     setBusyRemoveGroup(null);
                   }}
                   disabled={busyRemoveGroup === g.id}
-                  className="rounded-lg p-2 text-[var(--muted)] hover:bg-[var(--color-ink-25)] hover:text-[var(--danger)] dark:hover:bg-[var(--color-ink-900)] disabled:opacity-50"
                   aria-label="حذف المجموعة"
                 >
                   {busyRemoveGroup === g.id ? (
@@ -164,7 +169,7 @@ export function GroupsManager() {
                   ) : (
                     <Trash2 size={18} />
                   )}
-                </button>
+                </Button>
               </div>
             </div>
             {g.is_forum && openChat === g.telegram_chat_id && (
@@ -173,7 +178,9 @@ export function GroupsManager() {
                   <p className="text-sm font-medium text-[var(--muted)]">
                     المواضيع المعروفة
                   </p>
-                  <button
+                  <Button
+                    accentGhost
+                    size="sm"
                     disabled={busyRefresh === g.telegram_chat_id}
                     onClick={async () => {
                       setBusyRefresh(g.telegram_chat_id);
@@ -195,7 +202,6 @@ export function GroupsManager() {
                         }));
                       setBusyRefresh(null);
                     }}
-                    className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-medium text-[var(--color-primary-700)] hover:bg-[var(--color-primary-50)] disabled:opacity-50 dark:text-[var(--color-primary-300)] dark:hover:bg-[var(--color-primary-900)]"
                   >
                     {busyRefresh === g.telegram_chat_id ? (
                       <Spinner size={14} />
@@ -203,7 +209,7 @@ export function GroupsManager() {
                       <RefreshCw size={14} />
                     )}
                     تحديث من تيليجرام
-                  </button>
+                  </Button>
                 </div>
                 {loadingTopics[g.telegram_chat_id] ? (
                   <div className="flex items-center justify-center gap-2 p-4 text-sm text-[var(--muted)]">
@@ -278,28 +284,28 @@ export function GroupsManager() {
                             />
                           </form>
                         ) : (
-                          <button
-                            type="button"
+                          <Button
+                            variant="ghost"
+                            className="group justify-start gap-1.5 px-0 text-start text-[15px]"
                             onClick={() => {
                               setEditingTopicId(t.id);
                               setEditingName(t.name ?? "");
                             }}
-                            className="group flex items-center gap-1.5 text-left"
                           >
-                            <span className="text-[15px] truncate">
-                              {topicLabel(t)}
-                            </span>
+                            <span className="truncate">{topicLabel(t)}</span>
                             <Pencil
                               size={12}
                               className="shrink-0 opacity-0 transition-opacity group-hover:opacity-60 text-[var(--muted)]"
                             />
-                          </button>
+                          </Button>
                         )}
                         <p className="text-sm text-[var(--muted)]">
                           الموضوع {t.telegram_thread_id}
                         </p>
                       </div>
-                      <button
+                      <Button
+                        dangerGhost
+                        className="p-1.5"
                         disabled={busyRemoveTopic === t.id}
                         onClick={async () => {
                           setBusyRemoveTopic(t.id);
@@ -315,7 +321,6 @@ export function GroupsManager() {
                           if (!r.error) loadTopics(g.telegram_chat_id);
                           setBusyRemoveTopic(null);
                         }}
-                        className="rounded-lg p-1.5 text-[var(--muted)] hover:bg-[var(--color-ink-25)] hover:text-[var(--danger)] dark:hover:bg-[var(--color-ink-900)] disabled:opacity-50"
                         aria-label="حذف الموضوع"
                       >
                         {busyRemoveTopic === t.id ? (
@@ -323,7 +328,7 @@ export function GroupsManager() {
                         ) : (
                           <Trash2 size={16} />
                         )}
-                      </button>
+                      </Button>
                     </div>
                   ))
                 )}

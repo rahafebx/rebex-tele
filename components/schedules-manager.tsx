@@ -37,6 +37,7 @@ import { Spinner } from "@/components/spinner";
 import Input from "./ui/input";
 import { Dropdown } from "./ui/dropdown";
 import { EmptyState } from "./ui/empty-state";
+import { Button } from "./ui/button";
 
 const topicLabel = (t: TelegramTopic) =>
   t.name ?? `الموضوع ${t.telegram_thread_id}`;
@@ -264,12 +265,12 @@ export function SchedulesManager({
             {editing ? "تحرير الجدولة" : "جدولة جديدة"}
           </h2>
           {editing && (
-            <button
+            <Button
+              size="sm"
               onClick={resetForm}
-              className="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
             >
               <X size={15} /> إلغاء
-            </button>
+            </Button>
           )}
         </div>
         <div className="grid gap-4 p-5 sm:grid-cols-2">
@@ -354,13 +355,13 @@ export function SchedulesManager({
                   className="mt-1.5 w-full rounded-lg border bg-transparent px-3 py-2.5 text-base text-right"
                 />
                 {repeatUntil && (
-                  <button
-                    type="button"
+                  <Button
+                    size="sm"
+                    className="mt-1.5 px-3 py-2"
                     onClick={() => setRepeatUntil("")}
-                    className="mt-1.5 rounded-lg border px-3 py-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
                   >
                     بلا حد
-                  </button>
+                  </Button>
                 )}
               </div>
               <span className="mt-1 block text-xs text-[var(--muted)]">
@@ -407,15 +408,16 @@ export function SchedulesManager({
               </span>
             )}
           </div>
-          <button
+          <Button
+            variant="primary"
+            size="md"
             onClick={save}
             disabled={busy === "save" || !chatId}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
           >
             {busy === "save" && <Spinner />}
             {editing ? <Save size={17} /> : <CalendarClock size={17} />}
             {editing ? "حفظ التعديلات" : "جدولة الإرسال"}
-          </button>
+          </Button>
         </div>
       </section>
 
@@ -488,7 +490,9 @@ export function SchedulesManager({
                   )}
                   <div className="flex flex-wrap items-center gap-2">
                     {s.status === "active" ? (
-                      <button
+                      <Button
+                        size="sm"
+                        className="text-[15px]"
                         onClick={async () => {
                           setBusy(`toggle:${s.id}`);
                           const r = await toggleScheduled(s.id);
@@ -504,7 +508,6 @@ export function SchedulesManager({
                           setBusy(null);
                         }}
                         disabled={busy === `toggle:${s.id}`}
-                        className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[15px] transition-colors hover:text-[var(--muted)] disabled:opacity-50"
                       >
                         {busy === `toggle:${s.id}` ? (
                           <Spinner />
@@ -512,9 +515,11 @@ export function SchedulesManager({
                           <Pause size={15} />
                         )}
                         إيقاف مؤقت
-                      </button>
+                      </Button>
                     ) : s.status === "paused" ? (
-                      <button
+                      <Button
+                        size="sm"
+                        className="text-[15px]"
                         onClick={async () => {
                           setBusy(`toggle:${s.id}`);
                           const r = await toggleScheduled(s.id);
@@ -532,7 +537,6 @@ export function SchedulesManager({
                           setBusy(null);
                         }}
                         disabled={busy === `toggle:${s.id}`}
-                        className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[15px] transition-colors hover:text-[var(--muted)] disabled:opacity-50"
                       >
                         {busy === `toggle:${s.id}` ? (
                           <Spinner />
@@ -540,16 +544,20 @@ export function SchedulesManager({
                           <Play size={15} />
                         )}
                         استئناف
-                      </button>
+                      </Button>
                     ) : null}
-                    <button
+                    <Button
+                      size="sm"
+                      className="text-[15px]"
                       onClick={() => startEdit(s)}
                       disabled={busy === `delete:${s.id}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[15px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] disabled:opacity-50"
                     >
                       <Pencil size={15} /> تحرير
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      size="sm"
+                      dangerOutline
+                      className="text-[15px]"
                       onClick={async () => {
                         if (
                           !window.confirm(
@@ -569,7 +577,6 @@ export function SchedulesManager({
                         setBusy(null);
                       }}
                       disabled={busy === `delete:${s.id}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[15px] text-[var(--danger)] transition-colors disabled:opacity-50"
                     >
                       {busy === `delete:${s.id}` ? (
                         <Spinner />
@@ -577,7 +584,7 @@ export function SchedulesManager({
                         <Trash2 size={15} />
                       )}
                       حذف
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}

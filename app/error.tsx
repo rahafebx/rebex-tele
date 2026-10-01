@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/components/ui/button";
 
 export default function GlobalError({
   error,
@@ -17,12 +18,9 @@ export default function GlobalError({
         <p className="mt-2 text-[15px] text-[var(--muted)]">
           {error.message || "حدث خطأ غير متوقع."}
         </p>
-        <button
-          onClick={() => reset()}
-          className="mt-6 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)]"
-        >
+        <Button variant="primary" size="md" className="mt-6" onClick={() => reset()}>
           إعادة المحاولة
-        </button>
+        </Button>
       </div>
     </main>
   );

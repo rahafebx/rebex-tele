@@ -29,6 +29,7 @@ import {
 import { Spinner } from "@/components/spinner";
 import Input from "./ui/input";
 import { EmptyState } from "./ui/empty-state";
+import { Button } from "./ui/button";
 
 type Message = { text: string; error: boolean };
 
@@ -233,23 +234,20 @@ export function CommandsManager({
             </div>
             <div className="flex items-center gap-3">
               {editing && (
-                <button
-                  onClick={resetForm}
-                  disabled={busy === "save"}
-                  className="inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-[15px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)] disabled:opacity-50"
-                >
+                <Button size="md" onClick={resetForm} disabled={busy === "save"}>
                   <X size={17} /> إلغاء
-                </button>
+                </Button>
               )}
-              <button
+              <Button
+                variant="primary"
+                size="md"
                 onClick={save}
                 disabled={busy === "save" || !command.trim()}
-                className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
               >
                 {busy === "save" && <Spinner />}
                 {editing ? <Save size={17} /> : <Plus size={17} />}
                 {editing ? "حفظ التعديلات" : "إضافة الأمر"}
-              </button>
+              </Button>
             </div>
           </div>
         </section>
@@ -298,21 +296,22 @@ export function CommandsManager({
                       />
                       مفعّل
                     </label>
-                    <button
+                    <Button
+                      size="sm"
                       onClick={() => startEdit(c)}
                       disabled={busy === `toggle:${c.id}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[15px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] disabled:opacity-50"
                     >
                       <Pencil size={15} /> تحرير
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      size="sm"
+                      dangerOutline
                       onClick={() => remove(c)}
                       disabled={busy === `delete:${c.id}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[15px] text-[var(--danger)] transition-colors disabled:opacity-50"
                     >
                       {busy === `delete:${c.id}` ? <Spinner /> : <Trash2 size={15} />}
                       حذف
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -355,24 +354,30 @@ export function CommandsManager({
                   className="mt-1.5 w-full rounded-lg border bg-transparent px-3 py-2.5 text-base text-right"
                 />
               </label>
-              <button
+              <Button
+                variant="primary"
+                size="md"
+                fullWidth
+                className="mt-4"
                 onClick={bindWebhook}
                 disabled={busy === "connect" || !botUsername || !publicUrl.trim()}
-                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-[15px] font-medium text-[var(--accent-foreground)] transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
               >
                 {busy === "connect" && <Spinner />}
                 <Link2 size={17} /> ربط الويب هوك
-              </button>
+              </Button>
             </>
           ) : (
-            <button
+            <Button
+              size="md"
+              dangerOutline
+              fullWidth
+              className="mt-4"
               onClick={unbindWebhook}
               disabled={busy === "disconnect"}
-              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-[15px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--danger)] disabled:opacity-50"
             >
               {busy === "disconnect" && <Spinner />}
               <Link2Off size={17} /> فصل الويب هوك
-            </button>
+            </Button>
           )}
           <p className="mt-4 text-sm leading-6 text-[var(--muted)]">
             يتطلب تيليجرام رابط HTTPS عام للموقع. الويب هوك يمنع استطلاع
