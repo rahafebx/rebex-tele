@@ -50,6 +50,17 @@ export async function sendTelegramMessage(input: {
         .eq("telegram_chat_id", input.chatId)
         .eq("telegram_thread_id", input.threadId)
         .maybeSingle();
+      // Clear any dismissal first. Deliberately sending into a topic is
+      // stronger evidence that it exists than a tombstone left behind by a
+      // remove — and without this the auto-capture would re-create the row the
+      // admin dismissed, which is the same resurrection the tombstone exists to
+      // prevent. Unconditional: it must happen even when the manual-name guard
+      // below skips the upsert.
+      await supabase
+        .from("telegram_topic_dismissals")
+        .delete()
+        .eq("telegram_chat_id", input.chatId)
+        .eq("telegram_thread_id", input.threadId);
       if (!existing?.is_manually_named) {
         await supabase.from("telegram_topics").upsert(
           {

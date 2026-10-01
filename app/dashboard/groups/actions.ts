@@ -8,6 +8,16 @@ import { logAudit } from "@/lib/audit";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
+/**
+ * Tolerance for `dismissed_at` (this server's clock) against an update's
+ * `message.date` (Telegram's). A dismissal only hides a topic when the newest
+ * update describing it is this far *older* than the dismissal, so a server
+ * clock running slightly ahead cannot hide a message that genuinely arrived
+ * afterwards — which would look exactly like a mis-dismissal that failed to
+ * heal.
+ */
+const DISMISSAL_SKEW_MS = 5 * 60_000;
+
 export async function addGroup(formData: FormData) {
   const chatId = String(formData.get("chatId") ?? "").trim();
   if (!chatId) return { error: "أدخل معرّف محادثة تيليجرام." };
@@ -108,10 +118,41 @@ export async function refreshChatTopics(chatId: string) {
     const manuallyNamed = new Set(
       (existing ?? []).map((r) => r.telegram_thread_id),
     );
+    // Dismissals the admin has recorded for this chat. Read separately from the
+    // topics above precisely because it has to live in its own table: an RLS
+    // predicate hiding dismissed rows would hide these from this very function.
+    //
+    // Unlike the `manuallyNamed` read, a failure here is returned rather than
+    // ignored — silently reading zero dismissals is exactly the resurrection
+    // this fixes.
+    const { data: dismissals, error: dismissalsError } = await supabase
+      .from("telegram_topic_dismissals")
+      .select("telegram_thread_id, name, dismissed_at")
+      .eq("telegram_chat_id", chatId);
+    if (dismissalsError)
+      return {
+        // 42P01 is Postgres' undefined_table. Distinguishing it matters: telling
+        // the admin to apply a migration they already applied sends them down
+        // the wrong path for what may be a permissions problem.
+        error:
+          dismissalsError.code === "42P01"
+            ? "تعذّرت قراءة المواضيع المحذوفة. تأكد من تطبيق ملف الترحيل 07 في محرر SQL."
+            : "تعذّرت قراءة المواضيع المحذوفة.",
+      };
+    const dismissed = new Map(
+      (dismissals ?? []).map((r) => [
+        r.telegram_thread_id as number,
+        {
+          at: new Date(r.dismissed_at as string).getTime(),
+          name: (r.name ?? null) as string | null,
+        },
+      ]),
+    );
     const rows: {
       telegram_chat_id: string;
       telegram_thread_id: number;
       name: string | null;
+      date: number;
     }[] = [];
     let offset = 0;
     for (let i = 0; i < 20; i++) {
@@ -132,18 +173,55 @@ export async function refreshChatTopics(chatId: string) {
       }
       if (updates.length < 100) break;
     }
-    const best = new Map<string, (typeof rows)[number]>();
+    const best = new Map<
+      string,
+      { name: string | null; date: number; threadId: number }
+    >();
     for (const r of rows) {
       const key = `${r.telegram_chat_id}:${r.telegram_thread_id}`;
       const cur = best.get(key);
-      if (!cur || (!cur.name && r.name)) best.set(key, r);
+      if (!cur) {
+        best.set(key, {
+          name: r.name,
+          date: r.date,
+          threadId: r.telegram_thread_id,
+        });
+        continue;
+      }
+      // Prefer whichever update knew a name; separately keep the NEWEST date,
+      // because that is what decides whether Telegram is describing the topic
+      // after the admin dismissed it. A topic with only old messages must still
+      // count as dismissed.
+      if (!cur.name && r.name) cur.name = r.name;
+      if (r.date > cur.date) cur.date = r.date;
     }
     for (const r of best.values()) {
-      if (manuallyNamed.has(r.telegram_thread_id)) continue;
+      if (manuallyNamed.has(r.threadId)) continue;
+      const dismissedAt = dismissed.get(r.threadId);
+      // A dismissal means "ignore what Telegram knew before this moment", not
+      // "this thread id is banned". If Telegram describes the topic *after* the
+      // dismissal — i.e. it is still alive and someone posted in it — the
+      // topic was dismissed by mistake and comes back.
+      if (dismissedAt && dismissedAt.at - DISMISSAL_SKEW_MS > r.date) continue;
+      // Only reached on the revive path or for a topic never dismissed. The
+      // remembered name keeps a self-healed topic from coming back as a bare
+      // thread id, since an ordinary message carries no name.
+      const name = r.name ?? dismissedAt?.name ?? null;
       const { error } = await supabase
         .from("telegram_topics")
-        .upsert(r, { onConflict: "telegram_chat_id,telegram_thread_id" });
+        .upsert(
+          { telegram_chat_id: chatId, telegram_thread_id: r.threadId, name },
+          { onConflict: "telegram_chat_id,telegram_thread_id" },
+        );
       if (error) return { error: error.message };
+      // The dismissal has served its purpose — clear it so the row's own
+      // lifecycle takes over and the tombstone pile does not grow.
+      if (dismissedAt)
+        await supabase
+          .from("telegram_topic_dismissals")
+          .delete()
+          .eq("telegram_chat_id", chatId)
+          .eq("telegram_thread_id", r.threadId);
     }
     const chat = await telegram.getChat(botToken, chatId);
     await supabase
@@ -179,6 +257,35 @@ export async function removeTopic(id: string) {
   const supabase = await createClient();
   const admin = await requireAdmin(supabase);
   if (!admin) return { error: ADMIN_ERROR };
+  // The delete is by row id, so the tombstone needs the thread id first.
+  const { data: topic, error: readError } = await supabase
+    .from("telegram_topics")
+    .select("telegram_chat_id, telegram_thread_id, name")
+    .eq("id", id)
+    .maybeSingle();
+  if (readError) return { error: readError.message };
+  if (!topic) return { error: "الموضوع غير موجود." };
+  // Dismissal BEFORE the delete, deliberately. If the delete then fails the
+  // admin is left with a still-visible topic plus a tombstone — recoverable,
+  // and renameTopic still works. The other order leaves no trace and the next
+  // refresh silently brings the topic back.
+  const { error: dismissError } = await supabase
+    .from("telegram_topic_dismissals")
+    .upsert(
+      {
+        telegram_chat_id: topic.telegram_chat_id,
+        telegram_thread_id: topic.telegram_thread_id,
+        name: topic.name,
+      },
+      // ignoreDuplicates, not a plain upsert: dismissing the same topic twice
+      // must be idempotent. A DO UPDATE would push dismissed_at forward and
+      // extend the window in which the topic stays hidden.
+      {
+        onConflict: "telegram_chat_id,telegram_thread_id",
+        ignoreDuplicates: true,
+      },
+    );
+  if (dismissError) return { error: dismissError.message };
   const { error } = await supabase
     .from("telegram_topics")
     .delete()
@@ -216,6 +323,7 @@ function collectTopics(
     telegram_chat_id: string;
     telegram_thread_id: number;
     name: string | null;
+    date: number;
   }[],
 ) {
   const m = u.message;
@@ -226,5 +334,8 @@ function collectTopics(
     telegram_chat_id: chatId,
     telegram_thread_id: m.message_thread_id,
     name: event?.name ?? null,
+    // 0 rather than `Date.now()`: an update carrying no date is no evidence
+    // that it postdates a dismissal, so it has to count as pre-dismissal.
+    date: (m.date ?? 0) * 1000,
   });
 }

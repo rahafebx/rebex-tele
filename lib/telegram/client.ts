@@ -58,6 +58,11 @@ export type TelegramUpdate = {
     chat: { id: number };
     is_topic_message?: boolean;
     message_thread_id?: number;
+    // Unix seconds. Not used for display — it is the only way to tell whether
+    // Telegram is describing a topic *after* the admin dismissed it, which is
+    // how a mistaken dismissal heals instead of being permanent. See
+    // telegram_topic_dismissals.
+    date?: number;
     forum_topic_created?: TelegramTopicEvent;
     forum_topic_edited?: TelegramTopicEvent;
   };
