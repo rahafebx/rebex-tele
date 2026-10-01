@@ -52,11 +52,16 @@ export default async function DashboardLayout({
       {/* max-w-6xl matches the landing page's content column. Without it the
           list pages stretched edge to edge on a wide monitor, putting a row's
           title and its action button ~2000px apart. tabIndex is required or the
-          skip link's target is not focusable and focus does not move. */}
+          skip link's target is not focusable and focus does not move.
+
+          pt-18/pb-20 on small screens clear the sidebar's two `fixed` bars — the
+          header (61px: py-3 top and bottom plus a 32px mark) and the bottom nav.
+          Neither occupies flow space below lg, so without this the top of every
+          page sits under the header and the last row under the nav. */}
       <main
         id="main-content"
         tabIndex={-1}
-        className="mx-auto w-full max-w-6xl min-w-0 p-5 sm:p-8 mb-20 lg:mb-0"
+        className="mx-auto w-full max-w-6xl min-w-0 p-5 pt-20 sm:p-8 sm:pt-24 mb-20 lg:mb-0 lg:pt-8"
       >
         {children}
       </main>
