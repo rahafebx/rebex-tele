@@ -10,6 +10,7 @@ hand.
 | 2 | `02_bot_features.sql` | `scheduled_messages` (depends on `is_admin()` and `telegram_chats`) |
 | 3 | `03_audit.sql` | `audit_logs`, `insert_audit_log()`, `purge_audit_logs_older_than()` |
 | 4 | `04_login_limiter.sql` | `login_attempts`, `count_login_attempts()` |
+| 5 | `07_topic_dismissals.sql` | `telegram_topic_dismissals`|
 
 Each file is a single `begin` / `commit` transaction, so a failure rolls the
 whole file back instead of leaving half a schema behind.
