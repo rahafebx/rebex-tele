@@ -146,6 +146,8 @@ Nothing sends a scheduled message except `runDueScheduled()`. It is triggered by
 - **Serverless (Vercel):** `pg_cron` pings `/api/cron` every minute.
 - **Self-hosted:** an in-process 60s ticker that starts under `npm run start` (not `npm run dev`) when `TELEX_SERVICE_ROLE_KEY` is set.
 
+The ticker is self-hosted-only by force: `ensureSchedulerTicker()` refuses to start when `process.env.VERCEL` is set, and the interval is `unref()`'d so it can never be the reason a process stays alive. On Vercel a pending `setInterval` keeps the event loop open after the response is sent, which makes every `/api/cron` ping and every dashboard render bill until the function instance is killed at `maxDuration` — enough to consume an entire Hobby compute budget on its own. On Vercel, only `pg_cron` triggers runs.
+
 Concurrency is safe: each due row is "claimed" with a conditional UPDATE (a 5-minute sentinel on `next_run_at`) so exactly one runner sends it, even when the cron ping and the in-process ticker race. Failures retry with backoff up to 5 consecutive failures, then the row is marked `failed`.
 
 ### Supabase scheduled function — step by step

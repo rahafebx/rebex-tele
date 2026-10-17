@@ -168,12 +168,18 @@ const g = globalThis as {
 
 // Self-hosted convenience: once the first request loads this module on a
 // long-running Next.js process, a per-minute loop keeps schedules firing
-// without any external cron. Serverless hosts (Vercel) should use /api/cron
-// instead; the per-row optimistic claim keeps both safe to run together.
+// without any external cron. Serverless hosts must use /api/cron instead;
+// the per-row optimistic claim keeps both safe to run together.
 export function ensureSchedulerTicker() {
   if (g.__schedTicker__) return;
   if (!process.env.REBEX_SERVICE_ROLE_KEY) return;
-  g.__schedTicker__ = setInterval(async () => {
+  // Enforced, not just intended: on Vercel (VERCEL=1 at build and runtime) a
+  // pending setInterval keeps the event loop alive after the response is
+  // sent, so every /api/cron ping and every dashboard render bills until the
+  // instance is killed at maxDuration instead of returning in ~200ms. That
+  // alone consumed ~100% of the Hobby compute budget.
+  if (process.env.VERCEL) return;
+  const ticker = setInterval(async () => {
     if (g.__runningSched__) return;
     g.__runningSched__ = true;
     try {
@@ -183,4 +189,9 @@ export function ensureSchedulerTicker() {
       g.__runningSched__ = false;
     }
   }, TICK_MS);
+  // The ticker must never be the reason a process stays alive (graceful
+  // shutdown, or any non-Vercel serverless host): the HTTP server keeps
+  // next start running on its own.
+  ticker.unref?.();
+  g.__schedTicker__ = ticker;
 }

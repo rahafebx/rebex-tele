@@ -33,8 +33,9 @@ async function handle(request: Request): Promise<Response> {
   if (!header || !safeEqual(header, secret))
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
-  // On self-hosted next start this (re)starts the per-minute ticker in the
-  // same process; on serverless hosts the cron ping itself triggers the run.
+  // Self-hosted: (re)starts the per-minute ticker in the same process. On
+  // Vercel this is a no-op (the ticker refuses to start serverless-side), so
+  // the cron ping itself is what triggers the run.
   ensureSchedulerTicker();
   const result = await runDueScheduled();
   return NextResponse.json(result);
